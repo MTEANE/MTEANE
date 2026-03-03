@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triggrr — Work Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #171717;
+    --border: #2a2a2a;
+    --border-light: #222;
+    --text: #e8e8e8;
+    --muted: #666;
+    --dim: #444;
+    --a: #6ee7b7;
+    --b: #7dd3fc;
+    --tag-sync: #fbbf24;
+    --tag-parallel: #a78bfa;
+    --tag-blocked: #f87171;
+    --phase-1: #6ee7b7;
+    --phase-2: #7dd3fc;
+    --phase-3: #c4b5fd;
+    --phase-4: #fda4af;
+    --phase-5: #fbbf24;
+    --phase-6: #86efac;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  /* ── Header ── */
+  .header {
+    padding: 48px 64px 40px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .header-left h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: #fff;
+  }
+
+  .header-left h1 span { color: var(--a); }
+  .header-left p {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ── Phase Header ── */
+  .phase {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .phase-header {
+    padding: 20px 64px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border-light);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .phase-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .phase-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .phase-goal {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .phase-bar {
+    width: 3px;
+    height: 18px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── Day Row ── */
+  .day {
+    display: grid;
+    grid-template-columns: 180px 1fr 1fr;
+    border-bottom: 1px solid var(--border-light);
+    min-height: 1px;
+  }
+
+  .day:last-child { border-bottom: none; }
+
+  .day-meta {
+    padding: 24px 64px 24px 64px;
+    border-right: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .day-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .day-number span {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+    font-weight: 400;
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .day-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-top: 4px;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+
+  .tag {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .tag-sync    { background: rgba(251,191,36,0.12); color: var(--tag-sync); border: 1px solid rgba(251,191,36,0.2); }
+  .tag-para    { background: rgba(167,139,250,0.12); color: var(--tag-parallel); border: 1px solid rgba(167,139,250,0.2); }
+  .tag-blocked { background: rgba(248,113,113,0.12); color: var(--tag-blocked); border: 1px solid rgba(248,113,113,0.2); }
+
+  /* ── Dev Columns ── */
+  .dev-col {
+    padding: 24px 32px;
+    border-right: 1px solid var(--border-light);
+  }
+
+  .dev-col:last-child { border-right: none; }
+
+  .dev-label {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .dev-a .dev-label { color: var(--a); }
+  .dev-b .dev-label { color: var(--b); }
+
+  .task-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .task {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .task-bullet {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--dim);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .task-content { flex: 1; }
+
+  .task-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .task-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    background: #1e1e1e;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #ccc;
+  }
+
+  /* ── EOD Banner ── */
+  .eod {
+    grid-column: 1 / -1;
+    padding: 10px 64px;
+    background: #131313;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .eod-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .eod-text { color: #888; }
+
+  /* ── Phase end ── */
+  .phase-end {
+    padding: 12px 64px;
+    background: #111;
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .phase-end-check {
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Summary ── */
+  .summary {
+    padding: 40px 64px;
+    border-top: 1px solid var(--border);
+  }
+
+  .summary h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2px;
+  }
+
+  .summary-card {
+    padding: 16px;
+    background: var(--surface);
+    border-radius: 4px;
+  }
+
+  .summary-days {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .summary-phase { font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+  .summary-focus { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>⚡ <span>Triggrr</span> — Work Plan</h1>
+    <p>2 developers · 21 working days · ordered by dependency, not calendar</p>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tag-sync)"></div> Sync required</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tag-parallel)"></div> Parallel work</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--tag-blocked)"></div> Blocked on previous</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 1
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-bar" style="background:var(--phase-1)"></div>
+    <div class="phase-num">Phase 1</div>
+    <div class="phase-title">Foundation</div>
+    <div class="phase-goal">Project boots · Auth works · Events can be received</div>
+  </div>
+
+  <!-- Day 1 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">01<span>Day</span></div>
+      <div class="day-name">Project Setup</div>
+      <div class="tags"><span class="tag tag-sync">Sync</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Repo + TypeScript config</div>
+          <div class="task-desc">Init with <code>npm init -y</code>, install Fastify + <code>tsx</code>, write <code>tsconfig.json</code> targeting ES2020 with strict mode on.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">docker-compose.yml</div>
+          <div class="task-desc">Three services: <code>postgres:15</code> on 5432 with named volume, <code>redis:7-alpine</code> on 6379, and an <code>app</code> service that depends on both.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Folder structure + Fastify skeleton</div>
+          <div class="task-desc">Create <code>src/api</code>, <code>workers</code>, <code>engine</code>, <code>db</code>, <code>queue</code>, <code>middleware</code>, <code>config</code> with empty index files. App boots and prints port.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">.env.example</div>
+          <div class="task-desc">List every variable the app will ever use: <code>DATABASE_URL</code>, <code>REDIS_URL</code>, <code>PORT</code>, <code>API_KEY_SECRET</code>.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/db/client.ts</div>
+          <div class="task-desc">Create a <code>pg</code> Pool from <code>DATABASE_URL</code>. Export a <code>query(text, params)</code> wrapper that logs SQL in dev mode and throws typed errors.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/queue/client.ts</div>
+          <div class="task-desc">Create a single <code>ioredis</code> connection exported as a singleton — BullMQ and the rate limiter will reuse it, not create their own.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/config/index.ts</div>
+          <div class="task-desc">Read and validate all env variables with <code>zod</code> on startup. If any required variable is missing, throw immediately with a clear message — fail fast, never silently.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Both DB and Redis connect successfully. App boots with no errors inside Docker.</span>
+    </div>
+  </div>
+
+  <!-- Day 2 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">02<span>Day</span></div>
+      <div class="day-name">DB Schema + Migrations</div>
+      <div class="tags"></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Migration 001 — organizations</div>
+          <div class="task-desc">Columns: <code>id</code> (UUID, default <code>gen_random_uuid()</code>), <code>name</code>, <code>slug</code> (unique), <code>plan</code> (default <code>'free'</code>), <code>created_at</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Migration 002 — api_keys</div>
+          <div class="task-desc">Columns: <code>org_id</code> (FK), <code>key_hash</code> (unique — SHA-256 only, never plaintext), <code>label</code>, <code>is_active</code>, <code>last_used_at</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/db/migrate.ts + seed.ts</div>
+          <div class="task-desc">Migration runner executes SQL files in order. Seed inserts one test org and one API key — logs the plaintext key to console once for testing.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/utils/hash.ts</div>
+          <div class="task-desc">Single export: <code>hashApiKey(key: string): string</code> using Node's <code>crypto.createHash('sha256')</code>. This is the only place hashing happens in the whole codebase.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/db/queries/orgs.ts</div>
+          <div class="task-desc">Write <code>findOrgById(id)</code> and <code>createOrg(name, slug)</code> as typed async functions over the query wrapper.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/db/queries/apiKeys.ts</div>
+          <div class="task-desc">Write <code>findActiveKeyByHash(hash)</code> — joins to <code>organizations</code> and returns both records in one query. Auth middleware needs both in a single round-trip.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Org and key exist in DB. Key can be looked up by its SHA-256 hash.</span>
+    </div>
+  </div>
+
+  <!-- Day 3 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">03<span>Day</span></div>
+      <div class="day-name">Auth + Events Route</div>
+      <div class="tags"></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">POST /auth/register</div>
+          <div class="task-desc">Creates org, generates a 32-byte random key via <code>crypto.randomBytes</code>, stores its hash, and returns <code>{ org_id, api_key }</code> once with a "store this — never shown again" warning.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/middleware/auth.ts</div>
+          <div class="task-desc">Fastify <code>preHandler</code>: reads <code>x-api-key</code> header → hashes it → calls <code>findActiveKeyByHash</code> → attaches <code>request.org</code>. Returns <code>401</code> for missing key, <code>403</code> for invalid or inactive.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">TypeScript type extension</div>
+          <div class="task-desc">Extend Fastify's request type so <code>request.org</code> is fully typed everywhere — no casting needed in route handlers.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">POST /events — route + schema</div>
+          <div class="task-desc">Fastify JSON schema: <code>event_type</code> required (pattern <code>^[a-z]+\.[a-z_]+$</code>), <code>payload</code> required (any object), <code>idempotency_key</code> optional string.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/db/queries/events.ts</div>
+          <div class="task-desc">Write <code>insertEvent(orgId, eventType, payload, idempotencyKey?)</code>. The route calls this and returns <code>{ event_id, received_at, status: "received" }</code>. No queue yet — just stored.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Can register an org, receive a key, and hit POST /events with it. Event is stored in DB.</span>
+    </div>
+  </div>
+
+  <!-- Day 4 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">04<span>Day</span></div>
+      <div class="day-name">Idempotency + Health</div>
+      <div class="tags"><span class="tag tag-para">Parallel</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">GET /health</div>
+          <div class="task-desc">Checks three things: <code>SELECT 1</code> on Postgres, <code>PING</code> on Redis, process memory under threshold. Returns <code>{ status, db, redis, uptime }</code> with appropriate HTTP code.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Auth middleware edge cases</div>
+          <div class="task-desc">Manually verify with curl: missing header → 401, wrong key → 403, inactive key → 403 with specific message, valid key → request proceeds. Document results in <code>tests/auth.md</code>.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Idempotency logic in insertEvent</div>
+          <div class="task-desc">Before inserting, check if a row exists with <code>WHERE org_id = $1 AND idempotency_key = $2</code>. If yes, return the existing <code>event_id</code> — no new insert. Caller always gets <code>200</code> either way.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Unique DB index</div>
+          <div class="task-desc">Add <code>UNIQUE INDEX idx_events_idempotency ON events(org_id, idempotency_key) WHERE idempotency_key IS NOT NULL</code>. This is the safety net for race conditions — two simultaneous requests can't both insert.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Duplicate events with the same idempotency key are silently deduplicated. Health endpoint reports live status.</span>
+    </div>
+  </div>
+
+  <div class="phase-end">
+    <span class="phase-end-check" style="color:var(--phase-1)">✓ Phase 1 Complete</span>
+    <span style="color:var(--muted)">— Secured API accepts and stores events. Auth, idempotency, and health all working.</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 2
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-bar" style="background:var(--phase-2)"></div>
+    <div class="phase-num">Phase 2</div>
+    <div class="phase-title">Queue & Worker</div>
+    <div class="phase-goal">Events flow into Redis · Worker picks them up · Rules are stored</div>
+  </div>
+
+  <!-- Day 5 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">05<span>Day</span></div>
+      <div class="day-name">BullMQ Integration</div>
+      <div class="tags"><span class="tag tag-blocked">Blocked</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/queue/eventsQueue.ts</div>
+          <div class="task-desc">Create BullMQ <code>Queue</code> named <code>"events"</code>. Export <code>enqueueEvent(eventId, orgId, eventType)</code> with options: <code>attempts: 3</code>, exponential backoff delay <code>2000ms</code>, <code>removeOnComplete: 100</code>, <code>removeOnFail: 500</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Wire into POST /events</div>
+          <div class="task-desc">After DB insert succeeds, call <code>enqueueEvent</code>. If enqueue fails, log the error but still return <code>200</code> — the event is safely stored in DB and can be recovered.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/workers/index.ts</div>
+          <div class="task-desc">BullMQ <code>Worker</code> processing the <code>"events"</code> queue with <code>concurrency: 5</code>. For now the process function just logs <code>job.data.eventId</code> and returns.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Graceful shutdown</div>
+          <div class="task-desc">Listen for <code>SIGTERM</code> and <code>SIGINT</code>. On signal, call <code>worker.close()</code> — this waits for in-progress jobs to finish before the process exits, preventing false failures on deploy.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">POST /events → job queued in Redis → worker logs the event ID. End-to-end async flow working.</span>
+    </div>
+  </div>
+
+  <!-- Day 6 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">06<span>Day</span></div>
+      <div class="day-name">Worker Fetches Event</div>
+      <div class="tags"><span class="tag tag-blocked">Blocked</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">fetchEventWithOrg(eventId)</div>
+          <div class="task-desc">Single query joining <code>events</code> + <code>organizations</code> — returns the full event row plus org plan and name. Worker calls this right after receiving a job.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Handle event-not-found</div>
+          <div class="task-desc">If the event doesn't exist in DB, call <code>job.discard()</code> — permanently fail without retrying. Retrying a missing event will never succeed; retries would just waste queue cycles.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/utils/logger.ts</div>
+          <div class="task-desc">Pino logger with <code>level: process.env.LOG_LEVEL || 'info'</code>. Use <code>pino-pretty</code> in dev mode. Export as a single instance — never instantiate elsewhere.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Replace all console.log</div>
+          <div class="task-desc">Worker logs a structured object per job: <code>{ event_id, org_id, event_type, attempt, status }</code>. Status is <code>'processing'</code> on start, <code>'completed'</code> on success, <code>'failed'</code> with <code>error</code> field on failure.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Worker fetches real event data from DB and emits structured logs per job lifecycle.</span>
+    </div>
+  </div>
+
+  <!-- Day 7 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">07<span>Day</span></div>
+      <div class="day-name">Rule Fetching + Cache</div>
+      <div class="tags"><span class="tag tag-blocked">Blocked</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Migration 003 — rules table</div>
+          <div class="task-desc">Columns: <code>id</code>, <code>org_id</code> (FK), <code>name</code>, <code>event_type</code>, <code>condition</code> (jsonb), <code>action_type</code>, <code>action_config</code> (jsonb), <code>is_active</code>, timestamps.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Partial index + getActiveRules</div>
+          <div class="task-desc">Index: <code>idx_rules_org_event ON rules(org_id, event_type) WHERE is_active = true</code>. Write <code>getActiveRules(orgId, eventType)</code> query function. The partial index keeps it small — only active rules are indexed.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/cache/rules.ts</div>
+          <div class="task-desc">Three functions: <code>getCachedRules(orgId, eventType)</code>, <code>setCachedRules(orgId, eventType, rules, ttl=60)</code>, <code>invalidateRulesCache(orgId, eventType)</code>. Redis key pattern: <code>rules:{orgId}:{eventType}</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Wire cache into worker</div>
+          <div class="task-desc">Worker: check Redis first → on miss, call <code>getActiveRules</code> and write to cache with 60s TTL. 10 events/sec of the same type = 1 DB hit/minute instead of 600.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Worker fetches and caches active rules per org+event_type. DB is not hit on every job.</span>
+    </div>
+  </div>
+
+  <!-- Day 8 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">08<span>Day</span></div>
+      <div class="day-name">Rules CRUD API</div>
+      <div class="tags"><span class="tag tag-para">Parallel</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">POST /rules</div>
+          <div class="task-desc">Validate condition shape with Zod: must be <code>{ field, operator, value }</code>. Validate <code>action_type</code> is one of <code>webhook | email | slack</code>. Validate <code>action_config</code> shape per type (webhook needs valid URL, email needs <code>to/subject/body</code>, slack needs <code>webhook_url</code>).</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">GET /rules</div>
+          <div class="task-desc">Returns all rules for the authenticated org, ordered by <code>created_at DESC</code>.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">PATCH /rules/:id</div>
+          <div class="task-desc">Accepts partial updates to <code>name</code>, <code>condition</code>, <code>action_config</code>, <code>is_active</code>. After DB update, call <code>invalidateRulesCache</code> for both old and new <code>event_type</code> (in case it changed).</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">DELETE /rules/:id</div>
+          <div class="task-desc">Soft delete only — set <code>is_active = false</code>, never hard delete. <code>action_logs</code> reference rules; deleting them makes historical logs unreadable. Invalidate cache after update.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Rules can be created, listed, updated, and deactivated. Cache stays consistent with every write.</span>
+    </div>
+  </div>
+
+  <div class="phase-end">
+    <span class="phase-end-check" style="color:var(--phase-2)">✓ Phase 2 Complete</span>
+    <span style="color:var(--muted)">— Full async flow end-to-end. Events enqueue, worker processes, rules are stored and cached.</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 3
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-bar" style="background:var(--phase-3)"></div>
+    <div class="phase-num">Phase 3</div>
+    <div class="phase-title">Rule Engine</div>
+    <div class="phase-goal">Worker evaluates conditions · Matched rules trigger action_logs</div>
+  </div>
+
+  <!-- Day 9 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">09<span>Day</span></div>
+      <div class="day-name">Rule Evaluator</div>
+      <div class="tags"><span class="tag tag-sync">Sync First</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/engine/evaluator.ts — core</div>
+          <div class="task-desc">Main export: <code>evaluate(condition, payload): boolean</code>. The <code>field</code> supports dot notation — <code>"order.amount"</code> resolves to <code>payload.order.amount</code> via a <code>resolvePath(obj, path)</code> helper.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Operators: eq, neq, gt, gte, lt, lte</div>
+          <div class="task-desc">Numeric comparisons cast both sides to <code>Number</code> before comparing — so <code>"100"</code> and <code>100</code> both work with <code>gt</code>.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Operators: contains, startsWith, endsWith, exists, in, regex</div>
+          <div class="task-desc"><code>contains</code> works on strings and arrays. <code>exists</code> checks field is present and not null. <code>regex</code> tests field against a pattern string. All added to the same evaluator file.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/engine/evaluator.test.ts</div>
+          <div class="task-desc">Minimum 15 test cases. Must cover: nested dot paths, null values, type mismatches on numeric ops, missing fields with <code>exists</code>, array <code>in</code> checks, and malformed conditions that should return <code>false</code> not throw.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">All operators work correctly. 15+ tests passing. Evaluator never throws — returns false on bad input.</span>
+    </div>
+  </div>
+
+  <!-- Day 10 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">10<span>Day</span></div>
+      <div class="day-name">Evaluator → Worker</div>
+      <div class="tags"><span class="tag tag-blocked">Blocked</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Matching loop in worker</div>
+          <div class="task-desc">For each rule from cache, call <code>evaluate(rule.condition, event.payload)</code>. Collect matched rules. If a rule's condition is malformed and throws, catch per-rule and continue — one bad rule should not fail the entire job.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Log match results</div>
+          <div class="task-desc">Log <code>{ matched: N, total: M }</code> per job. Zero matches is normal, not an error — log it as <code>info</code>, not <code>warn</code>.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Migration 004 — action_logs</div>
+          <div class="task-desc">Columns: <code>id</code>, <code>event_id</code> (FK), <code>rule_id</code> (FK), <code>org_id</code>, <code>status</code> (<code>pending | success | failed | retrying | dead</code>), <code>attempt_count</code>, <code>error_message</code>, <code>response_body</code>, <code>executed_at</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Insert pending action_logs</div>
+          <div class="task-desc">After the matching loop, insert one <code>action_log</code> row per matched rule with <code>status: 'pending'</code>. These are the paper trail — if the process dies before executing, you know what was supposed to happen.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Worker evaluates all rules, identifies matches, and creates pending action_log entries for each.</span>
+    </div>
+  </div>
+
+  <div class="phase-end">
+    <span class="phase-end-check" style="color:var(--phase-3)">✓ Phase 3 Complete</span>
+    <span style="color:var(--muted)">— Rule engine works end-to-end. Events are matched against conditions. Matches are logged.</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 4
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-bar" style="background:var(--phase-4)"></div>
+    <div class="phase-num">Phase 4</div>
+    <div class="phase-title">Action Executors</div>
+    <div class="phase-goal">Matched rules trigger real actions · Results are logged</div>
+  </div>
+
+  <!-- Day 11 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">11<span>Day</span></div>
+      <div class="day-name">Executor Interface + Webhook</div>
+      <div class="tags"><span class="tag tag-blocked">Blocked</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/engine/executors/types.ts</div>
+          <div class="task-desc">Define <code>Executor</code> interface: <code>execute(config, event): Promise&lt;ExecutionResult&gt;</code>. Define <code>ExecutionResult</code>: <code>{ success: boolean, response?: string, error?: string }</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/engine/executors/webhook.ts</div>
+          <div class="task-desc">POST to <code>config.url</code> with event payload as JSON. 10-second timeout via <code>AbortController</code>. Capture response body (truncate to 1000 chars). Return <code>success: true</code> for 2xx, <code>false</code> for everything else.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/db/queries/actionLogs.ts</div>
+          <div class="task-desc">Write <code>updateActionLog(id, updates)</code>. On success: set <code>status = 'success'</code>, <code>response_body</code>, <code>executed_at</code>. On failure: set <code>status = 'failed'</code>, <code>error_message</code>, increment <code>attempt_count</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">One log row per rule match</div>
+          <div class="task-desc">Store <code>action_log.id</code> in the BullMQ job data. On retry, update the same row rather than inserting a new one. Each rule match has exactly one log row that progresses through statuses.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">A matched webhook rule fires an HTTP request and the result is logged with status + response.</span>
+    </div>
+  </div>
+
+  <!-- Day 12 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">12<span>Day</span></div>
+      <div class="day-name">Email Executor</div>
+      <div class="tags"><span class="tag tag-para">Parallel</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/engine/executors/email.ts</div>
+          <div class="task-desc">Nodemailer with SMTP from env (<code>SMTP_HOST</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>, <code>SMTP_PASS</code>). Transporter created once as module-level singleton, not inside <code>execute()</code>. Config shape: <code>{ to, subject, body }</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Template variable support</div>
+          <div class="task-desc"><code>subject</code> and <code>body</code> can contain <code>{{event_type}}</code> or <code>{{payload.amount}}</code>. Call Dev B's interpolation utility before sending. Use Mailtrap in dev to catch emails without actually sending.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/utils/template.ts</div>
+          <div class="task-desc">Export <code>interpolate(template: string, context: object): string</code>. Replaces <code>{{event_type}}</code>, <code>{{payload.amount}}</code>, <code>{{org.name}}</code> using dot-notation resolution. Unresolved paths become empty strings — never leave <code>{{undefined}}</code> in output.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Email executor sends templated emails. Variables from event payload are interpolated correctly.</span>
+    </div>
+  </div>
+
+  <!-- Day 13 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">13<span>Day</span></div>
+      <div class="day-name">Slack + Executor Registry</div>
+      <div class="tags"><span class="tag tag-para">Parallel</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/engine/executors/slack.ts</div>
+          <div class="task-desc">POST to <code>config.webhook_url</code> with a formatted <code>text</code> message including org name, event type, and key payload fields. Slack returns plain <code>"ok"</code> on success — check for that specifically, not just status 200.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/engine/executors/registry.ts</div>
+          <div class="task-desc">A <code>Map&lt;string, Executor&gt;</code> mapping <code>"webhook"</code>, <code>"email"</code>, <code>"slack"</code> to their instances. Export <code>getExecutor(actionType)</code> which throws a typed <code>UnknownActionTypeError</code> if the type isn't registered.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Wire registry into worker</div>
+          <div class="task-desc">For each matched rule: <code>registry.get(rule.action_type).execute(rule.action_config, event)</code>. Adding a new action type in future = write class + register it. Nothing else changes.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">All three action types work. Registry routes to the correct executor by action_type string.</span>
+    </div>
+  </div>
+
+  <div class="phase-end">
+    <span class="phase-end-check" style="color:var(--phase-4)">✓ Phase 4 Complete</span>
+    <span style="color:var(--muted)">— Rules fire real actions. Webhook, email, and Slack all execute and log results.</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 5
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-bar" style="background:var(--phase-5)"></div>
+    <div class="phase-num">Phase 5</div>
+    <div class="phase-title">Reliability</div>
+    <div class="phase-goal">Failures are handled gracefully · Abuse is throttled · System is hardened</div>
+  </div>
+
+  <!-- Day 14 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">14<span>Day</span></div>
+      <div class="day-name">Dead Letter Queue</div>
+      <div class="tags"><span class="tag tag-blocked">Blocked</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/queue/dlqQueue.ts</div>
+          <div class="task-desc">Separate BullMQ <code>Queue</code> named <code>"dead-letter"</code>. Listen for the worker's <code>"failed"</code> event — fires after all retries exhausted. Move job to DLQ with original data plus <code>{ failedReason, finalAttempt }</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">GET /dlq</div>
+          <div class="task-desc">Calls <code>dlqQueue.getFailed()</code> and returns jobs filtered to the authenticated org. Gives orgs visibility into what failed and why.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">POST /dlq/:job_id/retry</div>
+          <div class="task-desc">Fetches job from dead-letter queue, validates it belongs to the requesting org, re-adds it to the main <code>"events"</code> queue with fresh retry counters. Updates related <code>action_log</code> rows back to <code>status: 'retrying'</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Mark action_logs as dead</div>
+          <div class="task-desc">When a job exhausts all retries, update its <code>action_log</code> rows to <code>status: 'dead'</code>. This is the DB-side mirror of the queue-side DLQ — both stay in sync.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Failed jobs land in DLQ. Orgs can list them and manually retry. DB logs reflect dead status.</span>
+    </div>
+  </div>
+
+  <!-- Day 15 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">15<span>Day</span></div>
+      <div class="day-name">Rate Limiting</div>
+      <div class="tags"><span class="tag tag-para">Parallel</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/middleware/rateLimiter.ts</div>
+          <div class="task-desc">Redis sliding window via Lua script: <code>ZADD</code> current timestamp → <code>ZREMRANGEBYSCORE</code> entries older than 60s → <code>ZCARD</code> count remaining. All three commands in one atomic Lua script to prevent race conditions.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">429 with Retry-After</div>
+          <div class="task-desc">When limit exceeded, return <code>429</code> with a <code>Retry-After</code> header set to the seconds until the oldest entry in the window expires.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">src/config/plans.ts</div>
+          <div class="task-desc">Map plan names to limits: <code>{ free: 100, pro: 1000, enterprise: 10000 }</code> events/minute. Middleware reads <code>request.org.plan</code> (already attached by auth) to pick the correct limit.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Rule count limit on POST /rules</div>
+          <div class="task-desc">Before inserting a new rule, count existing active rules for the org. If <code>count >= planLimit.maxRules</code>, return <code>403</code> with message <code>"Rule limit reached for your plan"</code>. Free plan cap: 10 rules.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Per-tenant rate limiting active on POST /events. Plan-based rule caps enforced on rule creation.</span>
+    </div>
+  </div>
+
+  <!-- Day 16 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">16<span>Day</span></div>
+      <div class="day-name">Resilience Hardening</div>
+      <div class="tags"><span class="tag tag-para">Parallel</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Cache invalidation completeness</div>
+          <div class="task-desc">In <code>PATCH /rules/:id</code>, if <code>event_type</code> is being changed, invalidate cache for both the old and new type. A stale cache for the old type would keep firing rules that no longer apply.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">DB timeouts + latency monitoring</div>
+          <div class="task-desc">Set <code>statement_timeout: 5000</code> on the connection pool. Add a 30-second interval in <code>db/healthCheck.ts</code> that logs a warning if a test query exceeds 200ms.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Duplicate job guard</div>
+          <div class="task-desc">Before <code>queue.add()</code>, call <code>queue.getJob(eventId)</code>. If the job exists and is <code>waiting</code> or <code>active</code>, skip enqueuing and log a warning. Prevents double-processing when clients retry before the first job completes.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Configurable worker concurrency</div>
+          <div class="task-desc">Read concurrency from <code>WORKER_CONCURRENCY</code> env variable, default <code>5</code>. Document it in <code>.env.example</code> with a note on when to tune it (CPU-bound vs I/O-bound workloads).</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">System handles failures, abuse, and restarts without data loss or duplicate processing.</span>
+    </div>
+  </div>
+
+  <div class="phase-end">
+    <span class="phase-end-check" style="color:var(--phase-5)">✓ Phase 5 Complete</span>
+    <span style="color:var(--muted)">— DLQ captures dead jobs. Rate limiting active. Cache, timeouts, and duplicates all handled.</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 6
+════════════════════════════════════════ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-bar" style="background:var(--phase-6)"></div>
+    <div class="phase-num">Phase 6</div>
+    <div class="phase-title">Observability & Polish</div>
+    <div class="phase-goal">Demo-ready · Documented · Deployable</div>
+  </div>
+
+  <!-- Day 17 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">17<span>Day</span></div>
+      <div class="day-name">Logs & Stats API</div>
+      <div class="tags"><span class="tag tag-para">Parallel</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">GET /logs</div>
+          <div class="task-desc">Queries <code>action_logs</code> joined with <code>rules</code> for rule name. Supports: <code>?status=failed</code>, <code>?rule_id=...</code>, <code>?limit=20</code>, <code>?cursor=...</code> (cursor pagination — not offset, which degrades on large tables).</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">GET /stats</div>
+          <div class="task-desc">Single query returning: <code>total_events</code>, <code>total_actions_fired</code>, <code>success_rate</code> (percentage), <code>top_rules</code> (top 5 by fire count). One round-trip to DB, no N+1.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">GET /rules/:id/logs</div>
+          <div class="task-desc">Action log history for a specific rule, ordered by <code>executed_at DESC</code>. Useful for debugging why a rule fired or didn't. Paginated same as <code>GET /logs</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Query indexes + EXPLAIN ANALYZE</div>
+          <div class="task-desc">Add indexes: <code>action_logs(org_id, status)</code>, <code>action_logs(rule_id, executed_at DESC)</code>. Run <code>EXPLAIN ANALYZE</code> on each new query and paste the output as a comment above it — proves the query plan was verified.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Orgs can query their action history and see stats. All queries use indexes and are verified.</span>
+    </div>
+  </div>
+
+  <!-- Day 18 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">18<span>Day</span></div>
+      <div class="day-name">API Documentation</div>
+      <div class="tags"><span class="tag tag-para">Parallel</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Fastify Swagger + Swagger UI</div>
+          <div class="task-desc">Install <code>@fastify/swagger</code> and <code>@fastify/swagger-ui</code>. Add <code>description</code>, <code>tags</code>, and <code>response</code> schemas to every route. Define <code>x-api-key</code> as a security scheme so testers can authenticate directly in the UI at <code>/docs</code>.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Postman collection</div>
+          <div class="task-desc">Save as <code>docs/triggrr.postman_collection.json</code>. Folders per phase. Each request has a description, pre-filled example body, and a test script asserting response status and key fields.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Postman environment file</div>
+          <div class="task-desc">Save as <code>docs/triggrr.postman_environment.json</code> with variables <code>base_url</code>, <code>api_key</code>, <code>org_id</code>. Finalize <code>.env.example</code> with a one-line comment explaining every variable.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">Swagger UI live at /docs. Postman collection covers every endpoint with working examples.</span>
+    </div>
+  </div>
+
+  <!-- Day 19 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">19<span>Day</span></div>
+      <div class="day-name">Docker + Deploy Prep</div>
+      <div class="tags"><span class="tag tag-sync">Sync</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Dockerfile.api</div>
+          <div class="task-desc">Multi-stage: stage 1 installs deps and compiles TypeScript, stage 2 copies only <code>dist/</code> and <code>node_modules</code> for a lean final image. Entrypoint: <code>node dist/api/index.js</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">fly.toml</div>
+          <div class="task-desc">Set <code>internal_port = 3000</code>, health check at <code>/health</code>, <code>auto_stop_machines = false</code> (API must always be on). Set all secrets via <code>fly secrets set</code> — never hardcode in config. Write <code>docs/deploy.md</code>.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Dockerfile.worker</div>
+          <div class="task-desc">Same multi-stage pattern. Entrypoint: <code>node dist/workers/index.js</code>. Worker is a separate deployable process with independent scaling.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">docker-compose.yml — full stack</div>
+          <div class="task-desc">Add <code>api</code> and <code>worker</code> services. Both use <code>depends_on</code> with <code>condition: service_healthy</code>. Write healthcheck configs for postgres and redis containers so Docker waits for readiness, not just startup.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text"><code>docker compose up --build</code> starts the full stack cleanly from zero with no manual steps.</span>
+    </div>
+  </div>
+
+  <!-- Day 20 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">20<span>Day</span></div>
+      <div class="day-name">README + Architecture</div>
+      <div class="tags"><span class="tag tag-para">Parallel</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Architecture diagram</div>
+          <div class="task-desc">Excalidraw or draw.io. Show: Client → API → Postgres + Redis Queue → Worker → Rule Engine → Executor → External Service. Show retry loop and cache layer. Export as SVG for README and PNG for sharing.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">README.md</div>
+          <div class="task-desc">Sections: What It Is, Architecture (embed diagram), Tech Stack, How to Run Locally (step-by-step from <code>git clone</code> to first event processed), API Overview (endpoint table), Environment Variables (table matching <code>.env.example</code>).</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">scripts/demo.sh</div>
+          <div class="task-desc">Bash script using <code>curl</code>: registers org → captures key → creates webhook rule pointing to <code>webhook.site</code> → sends matching event → polls <code>GET /logs</code> until <code>status: success</code> → prints the <code>webhook.site</code> URL so the viewer can see the live request.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Loom walkthrough</div>
+          <div class="task-desc">Record a 3–5 min screen recording of <code>demo.sh</code> running end-to-end, narrating each step. This goes in the portfolio and LinkedIn — shows the system working without needing a live deployment.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">README is complete. Architecture diagram exists. Demo script runs end-to-end without errors.</span>
+    </div>
+  </div>
+
+  <!-- Day 21 -->
+  <div class="day">
+    <div class="day-meta">
+      <div class="day-number">21<span>Day</span></div>
+      <div class="day-name">Final QA</div>
+      <div class="tags"><span class="tag tag-sync">Both Together</span></div>
+    </div>
+    <div class="dev-col dev-a">
+      <div class="dev-label">Dev A — API / Infra</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Error path testing</div>
+          <div class="task-desc">Verify every failure case: bad API key → 403, malformed event body → 400, rule condition with bad operator → 400, webhook action pointing to dead URL → retries then DLQ, rate limit exceeded → 429 with <code>Retry-After</code>.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Deploy to Fly.io + Neon + Upstash</div>
+          <div class="task-desc">Deploy both API and worker. Run <code>demo.sh</code> against the live URL. Verify everything works identically to local. Tag <code>v1.0.0</code> on GitHub once confirmed.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="dev-col dev-b">
+      <div class="dev-label">Dev B — Worker / Engine</div>
+      <div class="task-list">
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">End-to-end smoke test</div>
+          <div class="task-desc">Fresh clone → <code>docker compose up</code> → run <code>demo.sh</code> → verify action fired → check <code>/stats</code> is accurate → check <code>/logs</code> shows correct entries. Fix anything that breaks before tagging.</div>
+        </div></div>
+        <div class="task"><div class="task-bullet"></div><div class="task-content">
+          <div class="task-title">Tag v1.0.0</div>
+          <div class="task-desc">Once live deployment passes the smoke test, create the release tag. Write a one-paragraph GitHub release note summarising what was built — this is what appears when someone clicks "Releases" on the repo.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="eod">
+      <span class="eod-label">End of Day</span>
+      <span class="eod-text">v1.0.0 tagged. Live URL works. Demo script passes on deployed environment.</span>
+    </div>
+  </div>
+
+  <div class="phase-end">
+    <span class="phase-end-check" style="color:var(--phase-6)">✓ Project Complete</span>
+    <span style="color:var(--muted)">— Triggrr is built, documented, deployed, and demo-ready.</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SUMMARY
+════════════════════════════════════════ -->
+<div class="summary">
+  <h2>Summary</h2>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-days" style="color:var(--phase-1)">1–4</div>
+      <div class="summary-phase">Foundation</div>
+      <div class="summary-focus">Auth, events API, idempotency</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-days" style="color:var(--phase-2)">5–8</div>
+      <div class="summary-phase">Queue & Worker</div>
+      <div class="summary-focus">BullMQ, async flow, rules CRUD</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-days" style="color:var(--phase-3)">9–10</div>
+      <div class="summary-phase">Rule Engine</div>
+      <div class="summary-focus">Evaluator, matching, action logs</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-days" style="color:var(--phase-4)">11–13</div>
+      <div class="summary-phase">Executors</div>
+      <div class="summary-focus">Webhook, email, Slack, registry</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-days" style="color:var(--phase-5)">14–16</div>
+      <div class="summary-phase">Reliability</div>
+      <div class="summary-focus">DLQ, rate limiting, hardening</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-days" style="color:var(--phase-6)">17–21</div>
+      <div class="summary-phase">Polish</div>
+      <div class="summary-focus">Logs, docs, Docker, README, QA</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
