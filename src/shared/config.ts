@@ -1,17 +1,16 @@
+const requireEnv = (key: string): string => {
+  const value = process.env[key];
+  if (!value) throw new Error(`Missing required environment variable: ${key}`);
+  return value;
+};
+
 export const config = {
   port: parseInt(process.env.PORT ?? '3000', 10),
   nodeEnv: process.env.NODE_ENV ?? 'development',
 
-  db: {
-    host: process.env.DB_HOST ?? 'localhost',
-    port: parseInt(process.env.DB_PORT ?? '5432', 10),
-    name: process.env.DB_NAME ?? 'triggrr',
-    user: process.env.DB_USER ?? 'postgres',
-    password: process.env.DB_PASSWORD ?? 'postgres',
-  },
+  // Neon PostgreSQL — set DATABASE_URL in Fly.io secrets
+  get databaseUrl() { return requireEnv('DATABASE_URL'); },
 
-  redis: {
-    host: process.env.REDIS_HOST ?? 'localhost',
-    port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
-  },
+  // Upstash Redis — set REDIS_URL in Fly.io secrets (rediss:// for TLS)
+  get redisUrl() { return requireEnv('REDIS_URL'); },
 } as const;
