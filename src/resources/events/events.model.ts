@@ -12,7 +12,6 @@ export interface EventRow {
 
 export interface EventWithOrg extends EventRow {
   org_name: string;
-  org_plan: 'free' | 'pro' | 'enterprise';
 }
 
 type PgErrorLike = Error & { code?: string; constraint?: string };
@@ -70,7 +69,7 @@ export async function fetchEventWithOrg(eventId: string): Promise<EventWithOrg |
   const result = await query<EventWithOrg>(
     `SELECT
        e.id, e.org_id, e.event_type, e.payload, e.idempotency_key, e.status, e.created_at,
-       o.name AS org_name, o.plan AS org_plan
+       o.name AS org_name
      FROM events e
      JOIN organizations o ON e.org_id = o.id
      WHERE e.id = $1

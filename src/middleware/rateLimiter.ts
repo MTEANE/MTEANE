@@ -1,13 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { redis } from '../shared/queue';
-import { PLAN_LIMITS } from '../config/plans';
+import { config } from '../config';
 
 // Sliding window rate limiter via a single atomic Lua script.
 // Uses a Redis sorted set keyed by orgId where every member is the
-// request timestamp (ms). Older entries outside the 60-second window
+// request timestamp (ms). Older entries outside the configured window
 // are pruned atomically so there are no race conditions.
-const SLIDING_WINDOW_MS = 60_000;
 
 // ARGV[4] is a unique member (UUID) passed from TypeScript so that two requests
 // arriving at the exact same millisecond each get their own sorted-set entry
@@ -43,17 +42,17 @@ export async function rateLimiter(
   reply: FastifyReply,
 ): Promise<void> {
   const org = request.org;
-  const limits = PLAN_LIMITS[org.plan];
   const key = `ratelimit:${org.id}`;
   const now = Date.now();
+  const { maxRequests, windowMs } = config.RATE_LIMIT;
 
   const result = await (redis.eval(
     LUA_SCRIPT,
     1,
     key,
     String(now),
-    String(SLIDING_WINDOW_MS),
-    String(limits.requestsPerMinute),
+    String(windowMs),
+    String(maxRequests),
     randomUUID(),
   ) as Promise<[number, number]>);
 
@@ -61,11 +60,11 @@ export async function rateLimiter(
 
   if (count === -1) {
     // Window is full — calculate how many seconds until the oldest entry expires
-    const retryAfterMs = Math.max(0, oldestTimestamp + SLIDING_WINDOW_MS - now);
+    const retryAfterMs = Math.max(0, oldestTimestamp + windowMs - now);
     const retryAfterSecs = Math.ceil(retryAfterMs / 1000);
 
     reply.header('Retry-After', String(retryAfterSecs));
-    reply.header('X-RateLimit-Limit', String(limits.requestsPerMinute));
+    reply.header('X-RateLimit-Limit', String(maxRequests));
     reply.header('X-RateLimit-Remaining', '0');
     await reply.status(429).send({
       message: `Rate limit exceeded. Try again in ${retryAfterSecs}s.`,
@@ -74,6 +73,6 @@ export async function rateLimiter(
     return;
   }
 
-  reply.header('X-RateLimit-Limit', String(limits.requestsPerMinute));
-  reply.header('X-RateLimit-Remaining', String(limits.requestsPerMinute - count));
+  reply.header('X-RateLimit-Limit', String(maxRequests));
+  reply.header('X-RateLimit-Remaining', String(maxRequests - count));
 }

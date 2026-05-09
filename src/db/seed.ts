@@ -10,11 +10,11 @@ async function seed() {
     logger.info('Seeding database...');
 
     const orgResult = await query(
-      `INSERT INTO organizations (name, slug, plan)
-       VALUES ($1, $2, $3)
+      `INSERT INTO organizations (name, slug)
+       VALUES ($1, $2)
        ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
-       RETURNING id, slug, plan`,
-      ['Test Organization', 'test-org', 'free'],
+       RETURNING id, slug`,
+      ['Test Organization', 'test-org'],
     );
 
     const org = orgResult.rows[0];

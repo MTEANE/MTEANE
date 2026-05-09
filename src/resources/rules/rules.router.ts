@@ -34,14 +34,7 @@ When an event arrives the worker loads all active rules for the org whose \`even
 | \`email\`     | \`to\`, \`subject\`, \`body\`          |
 | \`slack\`     | \`webhook_url\` (Slack Incoming Webhook URL) |
 
-**Plan limits**
-| Plan       | Max active rules |
-|------------|-----------------|
-| free       | 10              |
-| pro        | 100             |
-| enterprise | 1 000           |
-
-Exceeding the limit returns **403**. The rule cache for this org + event_type is invalidated immediately on creation so the worker picks up the new rule without waiting for the 60 s TTL.`,
+The rule cache for this org + event_type is invalidated immediately on creation so the worker picks up the new rule without waiting for the 60 s TTL.`,
 				tags: ['Rules'],
 				body: {
 					type: 'object',
@@ -88,11 +81,6 @@ Exceeding the limit returns **403**. The rule cache for this org + event_type is
 							errors:  { type: 'array', items: { type: 'object', additionalProperties: true } },
 						},
 					},
-					403: {
-						description: 'Plan rule limit reached',
-						type: 'object',
-						properties: { message: { type: 'string', description: 'e.g. "Rule limit reached for your plan (10 max). Upgrade to add more rules."' } },
-					},
 				},
 				security: [{ apiKey: [] }],
 			},
@@ -105,11 +93,11 @@ Exceeding the limit returns **403**. The rule cache for this org + event_type is
 		{
 			preHandler: [authPreHandler],
 			schema: {
-				description: `Return all rules (active and soft-deleted) for the authenticated organisation, ordered by creation date descending.
+				description: `Return all non-deleted rules for the authenticated organisation, ordered by creation date descending.
 
 Each rule object includes a computed \`last_triggered_at\` field — the \`executed_at\` timestamp of the most recent successful action log for that rule. This is a single LEFT JOIN; no separate request needed.
 
-Rules with \`is_active: false\` were soft-deleted (via \`DELETE /rules/:id\`) — they still appear in this list so audit history is preserved.`,
+Rules with \`is_active: false\` are paused. Deleted rules are hidden from this list while their rows remain available for historical action log joins.`,
 				tags: ['Rules'],
 				response: {
 					200: {
@@ -143,7 +131,7 @@ Rules with \`is_active: false\` were soft-deleted (via \`DELETE /rules/:id\`) �
 | \`name\`          | Rename without changing logic |
 | \`condition\`     | Full replacement of the condition object — same shape rules as POST /rules |
 | \`action_config\` | Full replacement — validated against the existing \`action_type\`; you cannot change action_type here |
-| \`is_active\`     | \`true\` re-enables a soft-deleted rule; \`false\` pauses it without deleting |
+| \`is_active\`     | \`true\` re-enables a paused rule; \`false\` pauses it without deleting |
 
 After a successful update the rule cache for this org + event_type is **immediately invalidated** in Redis (for both the old and new event_type if they differ) so the worker starts using the new rule on the very next event.`,
 				tags: ['Rules'],
@@ -189,11 +177,10 @@ After a successful update the rule cache for this org + event_type is **immediat
 		{
 			preHandler: [authPreHandler],
 			schema: {
-				description: `**Soft-delete** a rule — sets \`is_active = false\`. The rule row is kept so historical action logs remain queryable.
+				description: `Delete a rule from normal management views. This is implemented as a soft delete: \`deleted_at\` is set and \`is_active = false\`, while the rule row is kept so historical action logs remain queryable.
 
 The rule will stop matching new events immediately: the cache for this org + event_type is invalidated right after the DB update, so the worker won't load this rule on the next job.
-
-To fully re-enable the rule later, use \`PATCH /rules/:id\` with \`{ "is_active": true }\`.`,
+`,
 				tags: ['Rules'],
 				params: {
 					type: 'object',

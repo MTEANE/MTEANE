@@ -176,6 +176,7 @@ Full interactive docs: `http://localhost:3000/docs`
 | `REDIS_URL` | **Yes** | — | Redis connection string |
 | `API_KEY_SECRET` | **Yes** | — | HMAC secret for API key signing (32+ chars) |
 | `LOG_LEVEL` | No | `info` | Pino log level |
+| `RATE_LIMIT` | No | `1000/60s` | Per-org `POST /events` sliding-window limit, format `<requests>/<seconds>s` |
 | `WORKER_CONCURRENCY` | No | `5` | BullMQ worker concurrency |
 | `SMTP_HOST` | No | — | SMTP host (email actions only) |
 | `SMTP_PORT` | No | — | SMTP port |
@@ -191,7 +192,7 @@ Full interactive docs: `http://localhost:3000/docs`
 src/
 ├── api/              # Fastify app factory + plugin registration
 ├── cache/            # Redis rule cache (TTL 60s)
-├── config/           # App config + plan limits
+├── config/           # App config + rate limit parsing
 ├── db/               # DB client + migrations
 ├── engine/           # Rule evaluator + action executors
 │   └── executors/    # webhook, email, slack
@@ -237,13 +238,10 @@ fly deploy
 
 ---
 
-## Plans & Limits
+## Rate Limit
 
-| Plan | Requests/min | Max rules |
-|------|-------------|-----------|
-| `free` | 100 | 10 |
-| `pro` | 1,000 | 100 |
-| `enterprise` | 10,000 | 1,000 |
+`POST /events` uses a per-organisation Redis sliding-window rate limit.
+Configure it with `RATE_LIMIT=<requests>/<seconds>s`; the default is `1000/60s`.
 
 ---
 

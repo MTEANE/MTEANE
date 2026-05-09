@@ -21,6 +21,7 @@ export interface Rule {
   action_type: 'webhook' | 'email' | 'slack';
   action_config: Record<string, unknown>;
   is_active: boolean;
+  deleted_at: string | null;
   created_at: string;
   last_triggered_at: string | null;
 }
@@ -117,6 +118,21 @@ export interface DlqJob {
 
 export interface RuleLogsResponse {
   logs: ActionLog[];
+}
+
+export interface DemoWebhookDelivery {
+  id: string;
+  received_at: string;
+  event_id: string | null;
+  event_type: string | null;
+  org_id: string | null;
+  payload: unknown;
+  body: unknown;
+}
+
+export interface DemoWebhookResponse {
+  url: string;
+  deliveries: DemoWebhookDelivery[];
 }
 
 // ── HTTP helper ───────────────────────────────────────────────────────────────
@@ -219,6 +235,15 @@ export const triggrr = {
       return req<{ message: string; eventId: string }>(`/api/dlq/${jobId}/retry`, {
         method: 'POST',
       });
+    },
+  },
+
+  demoWebhook: {
+    get(): Promise<DemoWebhookResponse> {
+      return req<DemoWebhookResponse>('/api/demo-webhook');
+    },
+    clear(): Promise<{ ok: boolean }> {
+      return req<{ ok: boolean }>('/api/demo-webhook', { method: 'DELETE' });
     },
   },
 };

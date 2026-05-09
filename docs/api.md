@@ -8,7 +8,7 @@ This document is the human-readable narrative companion.
 ## Table of contents
 
 1. [Authentication](#1-authentication)
-2. [Plans & limits](#2-plans--limits)
+2. [Rate limit](#2-rate-limit)
 3. [Health — `GET /health`](#3-health--get-health)
 4. [Auth — `POST /auth/register`](#4-auth--post-authregister)
 5. [Events — `POST /events`](#5-events--post-events)
@@ -58,21 +58,13 @@ x-api-key: <your-64-char-hex-key>
 
 ---
 
-## 2. Plans & limits
+## 2. Rate limit
 
-Each organisation has a plan (`free`, `pro`, `enterprise`) that controls two things:
-
-| Plan       | Max active rules | Events / 60 s |
-|------------|-----------------|---------------|
-| free       | 10              | 100           |
-| pro        | 100             | 1 000         |
-| enterprise | 1 000           | 10 000        |
-
-**Rate limiting** is enforced on `POST /events` only, using a Redis sorted-set sliding window. The Lua script is atomic — no race conditions. When the limit is hit:
+`POST /events` uses a per-organisation Redis sorted-set sliding window. Configure it with `RATE_LIMIT=<requests>/<seconds>s`; the default is `1000/60s`. The Lua script is atomic — no race conditions. When the limit is hit:
 
 - HTTP **429** is returned
 - `Retry-After` header: seconds until the window resets
-- `X-RateLimit-Limit` header: the plan limit
+- `X-RateLimit-Limit` header: the configured request limit
 - `X-RateLimit-Remaining: 0`
 
 ---
@@ -193,7 +185,7 @@ No authentication required. Creates a new organisation and issues an API key.
 ```
 Request
   → Auth middleware (HMAC key lookup)
-  → Rate limiter (Redis sliding window, per plan)
+  → Rate limiter (Redis sliding window)
   → Zod validation
   → Idempotency check (if key supplied)
   → INSERT into events table
@@ -227,7 +219,7 @@ Request
 | 401    | Missing `x-api-key` header |
 | 403    | Invalid or inactive API key |
 | 413    | Request body > 512 KB |
-| 429    | Rate limit exceeded for the org's plan |
+| 429    | Configured rate limit exceeded for the org |
 
 ---
 
@@ -265,16 +257,14 @@ Rules define: **when** to act (which `event_type`), **what condition** must pass
 
 1. Body validated with Zod (400 on failure).
 2. `action_config` validated against the `action_type`-specific schema (400 on failure).
-3. Active rule count checked against plan limit (403 if at limit).
-4. Rule inserted into `rules` table.
-5. Redis cache for `org_id + event_type` is invalidated immediately so the worker picks up the new rule on the next job (no 60 s TTL wait).
+3. Rule inserted into `rules` table.
+4. Redis cache for `org_id + event_type` is invalidated immediately so the worker picks up the new rule on the next job (no 60 s TTL wait).
 
 **Error responses**
 
 | Status | When |
 |--------|------|
 | 400    | Validation failure on any field |
-| 403    | Plan rule limit reached |
 
 ---
 
@@ -672,7 +662,7 @@ All error responses follow one of two shapes:
 | 201  | Resource created |
 | 400  | Validation failure |
 | 401  | Missing `x-api-key` header |
-| 403  | Invalid key, inactive key, plan limit, or cross-org access denied |
+| 403  | Invalid key, inactive key, or cross-org access denied |
 | 404  | Resource not found for this org |
 | 409  | Conflict (duplicate slug) |
 | 413  | Request body too large (> 512 KB) |

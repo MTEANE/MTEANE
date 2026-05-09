@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { z } from 'zod';
+import { DEFAULT_RATE_LIMIT, parseRateLimit } from './rateLimit';
 
 const envSchema = z.object({
   PORT: z.string()
@@ -16,6 +17,9 @@ const envSchema = z.object({
   REDIS_URL: z.string().min(1, 'REDIS_URL is required'),
   API_KEY_SECRET: z.string().min(32, 'API_KEY_SECRET must be at least 32 characters'),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).optional().default('info'),
+  RATE_LIMIT: z.string()
+    .optional()
+    .transform((str = DEFAULT_RATE_LIMIT) => parseRateLimit(str)),
   WORKER_CONCURRENCY: z.string()
     .optional()
     .transform((str = '5') => {

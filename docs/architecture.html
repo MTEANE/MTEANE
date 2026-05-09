@@ -281,7 +281,6 @@ flowchart TD
 
         subgraph Reliability["Reliability Guards"]
             RateLimit["🚦 Rate Limiter\nper-tenant sliding window\nRedis Lua script"]
-            PlanLimit["📊 Plan Limits\nfree · pro · enterprise\nmax rules + req/min"]
         end
 
         subgraph Storage["Storage"]
@@ -317,9 +316,8 @@ flowchart TD
     RateLimit -->|"saves event"| PG
     RateLimit -->|"drops job instantly"| Q
     Register -->|"creates org + key"| PG
-    RulesCRUD -->|"plan limit check"| PlanLimit
-    PlanLimit -->|"saves rules"| PG
-    PlanLimit -->|"clears cache"| Redis
+    RulesCRUD -->|"saves rules"| PG
+    RulesCRUD -->|"clears cache"| Redis
     Observe -->|"reads logs + stats"| PG
 
     Q -->|"worker picks up"| Fetch
@@ -444,7 +442,7 @@ sequenceDiagram
     <ul>
       <li>Rate limiter — per-tenant sliding window via Redis</li>
       <li>Dead Letter Queue for exhausted jobs</li>
-      <li>Plan-based limits — free / pro / enterprise</li>
+      <li>Environment-configured rate limit</li>
       <li>Duplicate job guard — no double-processing</li>
     </ul>
   </div>

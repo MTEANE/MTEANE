@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { triggrr, type HealthResponse } from '@/lib/triggrr';
+import { triggrr, type DemoWebhookDelivery, type HealthResponse } from '@/lib/triggrr';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,8 @@ import {
   Copy,
   Check,
   ShieldAlert,
+  Webhook,
+  Trash2,
 } from 'lucide-react';
 
 // ── Health section ────────────────────────────────────────────────────────────
@@ -76,7 +78,9 @@ function HealthSection() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { check(); }, [check]);
+  useEffect(() => {
+    void Promise.resolve().then(check);
+  }, [check]);
 
   return (
     <Card>
@@ -146,6 +150,140 @@ function HealthSection() {
             />
           </div>
         ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── Demo webhook section ─────────────────────────────────────────────────────
+
+function DemoWebhookSection() {
+  const [url, setUrl] = useState('');
+  const [deliveries, setDeliveries] = useState<DemoWebhookDelivery[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [clearing, setClearing] = useState(false);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    triggrr.demoWebhook
+      .get()
+      .then(res => {
+        setUrl(res.url);
+        setDeliveries(res.deliveries);
+      })
+      .catch(() => toast.error('Failed to load demo webhook'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    void Promise.resolve().then(load);
+  }, [load]);
+
+  async function copyUrl() {
+    if (!url) return;
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function clearDeliveries() {
+    setClearing(true);
+    try {
+      await triggrr.demoWebhook.clear();
+      setDeliveries([]);
+      toast.success('Demo webhook cleared');
+    } catch (err) {
+      toast.error('Failed to clear demo webhook', { description: (err as Error).message });
+    } finally {
+      setClearing(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <CardTitle className="text-base">Demo Webhook</CardTitle>
+            <CardDescription className="mt-1">
+              Receives webhook actions from demo rules in this producer app.
+            </CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+            {loading ? (
+              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+            )}
+            Refresh
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Receiver URL</Label>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 font-mono text-xs bg-muted rounded px-3 py-2 break-all">
+              {url || 'Loading...'}
+            </code>
+            <Button variant="outline" size="sm" onClick={copyUrl} disabled={!url}>
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Webhook className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium">
+              {deliveries.length} deliver{deliveries.length === 1 ? 'y' : 'ies'}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearDeliveries}
+            disabled={clearing || deliveries.length === 0}
+          >
+            {clearing ? (
+              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+            )}
+            Clear
+          </Button>
+        </div>
+
+        {loading && deliveries.length === 0 ? (
+          <div className="h-20 rounded bg-muted/50 animate-pulse" />
+        ) : deliveries.length === 0 ? (
+          <div className="flex items-center justify-center h-20 rounded-lg border border-dashed text-sm text-muted-foreground">
+            No deliveries yet.
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+            {deliveries.map(delivery => (
+              <div key={delivery.id} className="rounded-lg border border-border bg-muted/30 p-3">
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <span className="font-mono text-foreground">
+                    {delivery.event_type ?? 'unknown.event'}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {new Date(delivery.received_at).toLocaleString()}
+                  </span>
+                </div>
+                <pre className="mt-2 max-h-24 overflow-auto text-xs font-mono text-muted-foreground">
+                  {JSON.stringify(delivery.payload ?? delivery.body, null, 2)}
+                </pre>
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -293,6 +431,7 @@ export default function SettingsPage() {
       />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <HealthSection />
+        <DemoWebhookSection />
         <RegisterSection />
       </div>
     </div>

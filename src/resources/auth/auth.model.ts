@@ -1,12 +1,9 @@
 import { query } from '../../shared/db';
 
-export type PlanType = 'free' | 'pro' | 'enterprise';
-
 export interface Organization {
 	id: string;
 	name: string;
 	slug: string;
-	plan: PlanType;
 	created_at: string;
 }
 
@@ -26,7 +23,7 @@ export interface ApiKeyWithOrg extends ApiKey {
 
 export async function findOrgById(id: string): Promise<Organization | null> {
 	const result = await query<Organization>(
-		'SELECT id, name, slug, plan, created_at FROM organizations WHERE id = $1',
+		'SELECT id, name, slug, created_at FROM organizations WHERE id = $1',
 		[id]
 	);
 	return result.rows[0] ?? null;
@@ -36,7 +33,7 @@ export async function findOrgBySlug(
 	slug: string
 ): Promise<Organization | null> {
 	const result = await query<Organization>(
-		'SELECT id, name, slug, plan, created_at FROM organizations WHERE slug = $1',
+		'SELECT id, name, slug, created_at FROM organizations WHERE slug = $1',
 		[slug]
 	);
 	return result.rows[0] ?? null;
@@ -45,28 +42,14 @@ export async function findOrgBySlug(
 export async function createOrg(
 	name: string,
 	slug: string,
-	plan: PlanType = 'free'
 ): Promise<Organization> {
 	const result = await query<Organization>(
-		`INSERT INTO organizations (name, slug, plan)
-     VALUES ($1, $2, $3)
-     RETURNING id, name, slug, plan, created_at`,
-		[name, slug, plan]
+		`INSERT INTO organizations (name, slug)
+     VALUES ($1, $2)
+     RETURNING id, name, slug, created_at`,
+		[name, slug]
 	);
 	if (!result.rows[0]) throw new Error('Failed to create organization');
-	return result.rows[0];
-}
-
-export async function updateOrgPlan(
-	id: string,
-	plan: PlanType
-): Promise<Organization> {
-	const result = await query<Organization>(
-		`UPDATE organizations SET plan = $1 WHERE id = $2
-     RETURNING id, name, slug, plan, created_at`,
-		[plan, id]
-	);
-	if (!result.rows[0]) throw new Error('Organization not found');
 	return result.rows[0];
 }
 
@@ -76,7 +59,7 @@ export async function findActiveKeyByHash(
 	const result = await query<any>(
 		`SELECT
        k.id, k.org_id, k.key_hash, k.label, k.is_active, k.last_used_at, k.created_at,
-       o.id AS org_id_verified, o.name, o.slug, o.plan, o.created_at AS org_created_at
+       o.id AS org_id_verified, o.name, o.slug, o.created_at AS org_created_at
      FROM api_keys k
      JOIN organizations o ON k.org_id = o.id
      WHERE k.key_hash = $1
@@ -98,7 +81,6 @@ export async function findActiveKeyByHash(
 			id: row.org_id_verified,
 			name: row.name,
 			slug: row.slug,
-			plan: row.plan,
 			created_at: row.org_created_at
 		}
 	};

@@ -1,7 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import {
-	countActiveRulesByOrg,
 	createRule,
 	findRuleById,
 	listRulesWithLastTriggered,
@@ -10,7 +9,6 @@ import {
 } from './rules.model';
 import type { Rule } from './rules.model';
 import { invalidateRulesCache } from '../../cache/rules';
-import { PLAN_LIMITS } from '../../config/plans';
 import { getRuleLogs } from '../logs/logs.model';
 
 const VALID_OPERATORS = [
@@ -98,14 +96,6 @@ export const createRuleHandler = async (request: FastifyRequest, reply: FastifyR
 	const configParsed = validateActionConfig(parsed.data.action_type, parsed.data.action_config);
 	if (!configParsed.success) {
 		return sendValidationError(reply, configParsed.error);
-	}
-
-	const activeCount = await countActiveRulesByOrg(request.org.id);
-	const ruleLimit = PLAN_LIMITS[request.org.plan].maxRules;
-	if (activeCount >= ruleLimit) {
-		return reply.status(403).send({
-			message: `Rule limit reached for your plan (${ruleLimit} max). Upgrade to add more rules.`,
-		});
 	}
 
 	const rule = await createRule(request.org.id, parsed.data);

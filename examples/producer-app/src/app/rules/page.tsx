@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { triggrr, type Rule } from '@/lib/triggrr';
 import { DEMO_RULES } from '@/lib/scenarios';
+import { withDemoWebhook } from '@/lib/demo-webhook';
 import { PageHeader } from '@/components/page-header';
 import { RuleRow } from '@/components/rule-row';
 import { RuleFormDialog } from '@/components/rule-form-dialog';
@@ -38,7 +39,9 @@ export default function RulesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    void Promise.resolve().then(load);
+  }, [load]);
 
   function openCreate() {
     setFormMode('create');
@@ -63,7 +66,7 @@ export default function RulesPage() {
     let failed = 0;
     for (const rule of DEMO_RULES) {
       try {
-        await triggrr.rules.create(rule);
+        await triggrr.rules.create(withDemoWebhook(rule));
         created++;
       } catch {
         failed++;

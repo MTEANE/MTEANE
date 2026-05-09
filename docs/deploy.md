@@ -47,6 +47,7 @@ fly secrets set \
   DATABASE_URL="postgresql://user:pass@ep-xxx.neon.tech/neondb?sslmode=require" \
   REDIS_URL="rediss://default:xxx@us1-xxx.upstash.io:6379" \
   API_KEY_SECRET="your-32-char-random-secret" \
+  RATE_LIMIT="1000/60s" \
   SMTP_HOST="smtp.example.com" \
   SMTP_PORT="587" \
   SMTP_USER="you@example.com" \
@@ -93,6 +94,7 @@ fly secrets set \
   DATABASE_URL="<neon-url>" \
   REDIS_URL="<upstash-url>" \
   API_KEY_SECRET="<same-secret>" \
+  RATE_LIMIT="1000/60s" \
   SMTP_HOST="..." SMTP_PORT="..." SMTP_USER="..." SMTP_PASS="..." SMTP_FROM="..." \
   --app triggrr-worker
 

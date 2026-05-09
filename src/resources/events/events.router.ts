@@ -13,7 +13,7 @@ export const eventsRouter = async (app: FastifyInstance) => {
 
 **Full processing pipeline**
 1. Auth middleware verifies the \`x-api-key\` header (HMAC-SHA256 hash lookup).
-2. Rate limiter checks the org's sliding-window quota (60 s window, per-plan limit — see plan table below).
+2. Rate limiter checks the org's sliding-window quota configured by \`RATE_LIMIT\` (default \`1000/60s\`).
 3. Request body is validated against the schema below.
 4. If \`idempotency_key\` is supplied, the DB is checked for a prior event with the same \`(org_id, idempotency_key)\` pair. A duplicate returns the **original** event_id without re-queuing.
 5. The event row is inserted into the \`events\` table.
@@ -23,12 +23,8 @@ export const eventsRouter = async (app: FastifyInstance) => {
 **event_type format**
 Must match \`^[a-z]+\\.[a-z_]+$\` — a dot-separated pair: \`<noun>.<verb>\`, e.g. \`order.placed\`, \`user.signup\`, \`payment.failed\`.
 
-**Rate limits by plan**
-| Plan       | Requests / 60 s |
-|------------|-----------------|
-| free       | 100             |
-| pro        | 1 000           |
-| enterprise | 10 000          |
+**Rate limit**
+Configured with \`RATE_LIMIT=<requests>/<seconds>s\`. The default is \`1000/60s\`.
 
 When the limit is hit the response is **429** with a \`Retry-After\` header (seconds until the window clears) and \`X-RateLimit-Limit\` / \`X-RateLimit-Remaining\` headers.
 
@@ -85,7 +81,7 @@ When the limit is hit the response is **429** with a \`Retry-After\` header (sec
 						properties: { message: { type: 'string' } },
 					},
 					429: {
-						description: 'Rate limit exceeded for the organisation\'s plan',
+						description: 'Rate limit exceeded for the organisation',
 						type: 'object',
 						properties: {
 							message:    { type: 'string', description: 'e.g. "Rate limit exceeded. Try again in 12s."' },

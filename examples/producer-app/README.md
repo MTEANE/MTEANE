@@ -139,5 +139,7 @@ src/
 |----------|-------------|
 | `TRIGGRR_URL` | Base URL of the Triggrr API (no trailing slash) |
 | `TRIGGRR_API_KEY` | API key issued by Triggrr at `POST /auth/register` |
+| `NEXT_PUBLIC_DEMO_WEBHOOK_URL` | Optional browser-visible demo receiver URL used by seeded webhook rules |
 
-Both variables are **server-side only** — never exposed to the browser.
+`TRIGGRR_URL` and `TRIGGRR_API_KEY` are **server-side only** — never exposed to the browser.
+`NEXT_PUBLIC_DEMO_WEBHOOK_URL` is intentionally browser-visible because it only points to the demo receiver.

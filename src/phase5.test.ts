@@ -11,14 +11,14 @@
  *                return value (number -1 vs string "-1"), and that Retry-After
  *                math is correct.
  *
- *  Extra:        verify PLAN_LIMITS values, DLQ orgId filtering, and the
+ *  Extra:        verify rate limit parsing, DLQ orgId filtering, and the
  *                ZADD member-uniqueness fix (UUID prevents collision).
  */
 
 import { randomUUID } from 'node:crypto';
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { PLAN_LIMITS } from './config/plans.ts';
+import { DEFAULT_RATE_LIMIT, parseRateLimit } from './config/rateLimit.ts';
 
 // ---------------------------------------------------------------------------
 // Hypothesis A — Worker failed-handler `isExhausted` logic
@@ -160,29 +160,34 @@ describe('Hypothesis C — ZADD member collision (fixed with UUID)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Plan limits correctness
+// Rate limit config parsing
 // ---------------------------------------------------------------------------
 
-describe('PLAN_LIMITS values', () => {
-  it('free plan: 100 req/min, max 10 rules', () => {
-    assert.strictEqual(PLAN_LIMITS.free.requestsPerMinute, 100);
-    assert.strictEqual(PLAN_LIMITS.free.maxRules, 10);
+describe('RATE_LIMIT config parsing', () => {
+  it('defaults to 1000 requests per 60 seconds', () => {
+    assert.strictEqual(DEFAULT_RATE_LIMIT, '1000/60s');
+    assert.deepStrictEqual(parseRateLimit(), {
+      maxRequests: 1000,
+      windowMs: 60_000,
+      windowSeconds: 60,
+    });
   });
 
-  it('pro plan: 1000 req/min, max 100 rules', () => {
-    assert.strictEqual(PLAN_LIMITS.pro.requestsPerMinute, 1000);
-    assert.strictEqual(PLAN_LIMITS.pro.maxRules, 100);
+  it('parses custom request and window values', () => {
+    assert.deepStrictEqual(parseRateLimit('250/30s'), {
+      maxRequests: 250,
+      windowMs: 30_000,
+      windowSeconds: 30,
+    });
   });
 
-  it('enterprise plan: 10000 req/min, max 1000 rules', () => {
-    assert.strictEqual(PLAN_LIMITS.enterprise.requestsPerMinute, 10_000);
-    assert.strictEqual(PLAN_LIMITS.enterprise.maxRules, 1000);
+  it('rejects invalid format', () => {
+    assert.throws(() => parseRateLimit('1000/minute'), /RATE_LIMIT must use the format/);
   });
 
-  it('all three plan keys exist', () => {
-    assert.ok('free' in PLAN_LIMITS);
-    assert.ok('pro' in PLAN_LIMITS);
-    assert.ok('enterprise' in PLAN_LIMITS);
+  it('rejects non-positive values', () => {
+    assert.throws(() => parseRateLimit('0/60s'), /requests must be a positive integer/);
+    assert.throws(() => parseRateLimit('1000/0s'), /window must be at least 1 second/);
   });
 });
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { triggrr } from '@/lib/triggrr';
 import type { Scenario } from '@/lib/scenarios';
+import { withDemoWebhook } from '@/lib/demo-webhook';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +37,7 @@ export function ScenarioCard({ scenario, onRuleSeeded }: ScenarioCardProps) {
   async function seedRule() {
     setSeeding(true);
     try {
-      await triggrr.rules.create(scenario.rule);
+      await triggrr.rules.create(withDemoWebhook(scenario.rule));
       toast.success('Rule created!', { description: scenario.rule.name });
       onRuleSeeded?.();
     } catch (e) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { triggrr, type CreateRuleInput, type Rule } from '@/lib/triggrr';
 import { SCENARIOS } from '@/lib/scenarios';
+import { getDemoWebhookUrl } from '@/lib/demo-webhook';
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Webhook } from 'lucide-react';
 
 const EVENT_TYPE_PATTERN = /^[a-z]+\.[a-z_]+$/;
 
@@ -147,7 +148,7 @@ export function RuleFormDialog({
       operator: r.condition.operator as Operator,
       conditionValue: conditionValueToString(r.condition.value),
       action_type: r.action_type,
-      webhookUrl: r.action_type === 'webhook' ? String(r.action_config.url ?? '') : '',
+      webhookUrl: r.action_type === 'webhook' ? getDemoWebhookUrl() : '',
       slackWebhookUrl:
         r.action_type === 'slack' ? String(r.action_config.webhook_url ?? '') : '',
       emailTo: r.action_type === 'email' ? String(r.action_config.to ?? '') : '',
@@ -169,6 +170,14 @@ export function RuleFormDialog({
       subject: state.emailSubject.trim(),
       body: state.emailBody.trim(),
     };
+  }
+
+  function useDemoWebhook() {
+    setState(s => ({
+      ...s,
+      action_type: 'webhook',
+      webhookUrl: getDemoWebhookUrl(),
+    }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -412,7 +421,13 @@ export function RuleFormDialog({
 
           {state.action_type === 'webhook' && (
             <div className="space-y-1.5">
-              <Label htmlFor="webhook-url">Webhook URL (HTTPS)</Label>
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="webhook-url">Webhook URL</Label>
+                <Button type="button" variant="outline" size="xs" onClick={useDemoWebhook}>
+                  <Webhook className="w-3 h-3 mr-1.5" />
+                  Use demo webhook
+                </Button>
+              </div>
               <Input
                 id="webhook-url"
                 className="font-mono text-sm"
